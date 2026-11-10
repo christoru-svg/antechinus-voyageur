@@ -147,6 +147,17 @@ dialog::backdrop{background:rgba(20,28,24,.55)}
 .removed{padding:14px;border-radius:12px;border:1px dashed var(--line);color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .confirm{padding:12px;border-radius:12px;background:var(--bg);font-size:14px;display:flex;flex-direction:column;gap:8px}
 .confirm .row{display:flex;gap:8px;flex-wrap:wrap}
+.replay{align-self:flex-start;border:1.5px solid var(--love);background:var(--love-soft);color:var(--love);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:600}
+.guide-sec{display:flex;flex-direction:column;margin-top:8px}
+.sheet .guide-sec h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:8px 0 4px;font-weight:800}
+.acc{border-top:1px solid var(--line)}
+.acc:last-child{border-bottom:1px solid var(--line)}
+.acc summary{list-style:none;cursor:pointer;padding:12px 2px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary::after{content:"+";color:var(--love);font-weight:800;font-size:18px;line-height:1}
+.acc[open] summary::after{content:"\2212"}
+.acc-body{padding:0 2px 14px;color:var(--muted);font-size:14px}
+.acc-body .themes dt{color:var(--ink)}
 .expiry{font-size:13px;color:var(--muted);margin-top:-6px}
 .expiry .t{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
 .krita{display:flex;flex-direction:column;gap:8px}
@@ -303,6 +314,6 @@ footer{font-size:12px;color:var(--muted);text-align:center}
 <dialog id="onboarding" aria-label="Bienvenue"></dialog>
 <div class="toast" id="toast" hidden></div>
 
-<script type="module" src="app.js?v=9"></script>
+<script type="module" src="app.js?v=10"></script>
 </body>
 </html>

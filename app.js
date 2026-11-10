@@ -8,8 +8,8 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore,
   collection, doc, query, where, onSnapshot, setDoc, updateDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=9";
-import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=9";
+import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=10";
+import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=10";
 
 const NAMES = { luigi: "Luigi", kritas: "Les Kritas" };
 const TO = { luigi: "Luigi", kritas: "les Kritas" };          // en milieu de phrase
@@ -546,24 +546,28 @@ function renderOnboarding() {
 
 function renderGuide() {
   const role = S.me || "luigi";
+  const acc = (title, body, open = false) =>
+    h("details", { class: "acc", open }, h("summary", {}, title), h("div", { class: "acc-body" }, body));
+  const section = (title, ...items) => h("section", { class: "guide-sec" }, h("h3", {}, title), ...items);
   $("guideBody").replaceChildren(
-    h("h3", {}, "Comment ça marche"),
-    h("ol", { class: "guide-steps" }, ...steps(role).map(([t, p]) => h("li", {}, h("b", {}, t), h("span", {}, p)))),
-    h("h3", {}, "Les thèmes"),
-    h("dl", { class: "themes" }, ...THEMES.flatMap(([t, d]) => [h("dt", {}, t), h("dd", {}, d)])),
-    h("h3", {}, "Les jours spéciaux"),
-    h("dl", { class: "themes" },
-      h("dt", {}, "Saison des amours (la vraie)"), h("dd", {}, "Du 1er au 21 août, comme chez l'antechinus brun : 21 questions plus coquines, et une jauge qui chute deux fois plus vite."),
-      h("dt", {}, "Fêtes"), h("dd", {}, "Nouvel An, Saint-Valentin, Réveillon, Noël et 31 décembre ont leur propre question."),
-      h("dt", {}, "Vos dates"), h("dd", {}, "Le 13 août (votre rencontre), le 26 octobre (anniversaire des Kritas) et le 26 novembre (anniversaire de Luigi).")),
-    h("h3", {}, "Questions fréquentes"),
-    h("dl", { class: "themes" },
-      h("dt", {}, "Qui peut lire nos lettres ?"), h("dd", {}, "Seulement vous deux : la base n'accepte que vos deux adresses e-mail, et chaque lettre reste fermée tant que l'autre n'a pas écrit la sienne."),
-      h("dt", {}, "Peut-on modifier une lettre ?"), h("dd", {}, "Non. Une fois scellée, elle est envoyée telle quelle. Seules la réaction et la boîte à trésors changent ensuite."),
-      h("dt", {}, "Que fait « Retirer cette lettre » ?"), h("dd", {}, "La lettre de l'autre n'apparaît plus pour toi. Elle n'est pas supprimée : tu peux la remettre depuis le même jour, dans le terrier."),
-      h("dt", {}, "Et si on rate un jour ?"), h("dd", {}, "La question reste dans le terrier. Vous pouvez y répondre quand vous voulez."),
-      h("dt", {}, "Comment l'installer sur le téléphone ?"), h("dd", {}, "Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮, puis « Installer l'application ».")),
-    h("button", { class: "link", type: "button", onclick: () => { $("guide").close(); if (S.phase === "ready") openOnboarding(); } }, "Revoir l'introduction"));
+    h("button", { class: "replay", type: "button", onclick: () => { $("guide").close(); openOnboarding(); } }, "Rejouer l'onboarding"),
+    section("Comment ça marche",
+      ...steps(role).map(([t, p], i) => acc(`${i + 1}. ${t}`, h("p", {}, p), i === 0))),
+    section("Les thèmes",
+      acc(`Les ${THEMES.length} thèmes du quotidien`,
+        h("dl", { class: "themes" }, ...THEMES.flatMap(([t, d]) => [h("dt", {}, t), h("dd", {}, d)]))),
+      acc("Saison des amours (la vraie)", h("p", {}, "Du 1er au 21 août, comme chez l'antechinus brun : 21 questions plus coquines, un bandeau dédié et une jauge qui chute deux fois plus vite.")),
+      acc("Les fêtes", h("p", {}, "Nouvel An, Saint-Valentin, Réveillon, Noël et 31 décembre ont leur propre question, avec une lettre encadrée en rose.")),
+      acc("Vos dates", h("p", {}, "Le 13 août (votre rencontre), le 26 octobre (anniversaire des Kritas) et le 26 novembre (anniversaire de Luigi)."))),
+    section("Les lettres",
+      acc("Qui peut lire nos lettres ?", h("p", {}, "Seulement vous deux : la base n'accepte que vos deux adresses e-mail, et chaque lettre reste fermée tant que l'autre n'a pas écrit la sienne.")),
+      acc("Peut-on modifier une lettre ?", h("p", {}, "Non. Une fois scellée, elle est envoyée telle quelle. Seules la réaction, la boîte à trésors et le retrait changent ensuite.")),
+      acc("Que fait « Garder précieusement » ?", h("p", {}, "Une fois les deux lettres d'un jour ouvertes, l'échange est rangé dans ta boîte à trésors, sous la lettre du jour. Chacun a la sienne.")),
+      acc("Que fait « Retirer cette lettre » ?", h("p", {}, "La lettre de l'autre n'apparaît plus pour toi. Elle n'est pas supprimée : tu peux la remettre depuis le même jour, dans le terrier.")),
+      acc("Et si on rate un jour ?", h("p", {}, "La question reste dans le terrier, en bas de la page. Vous pouvez y répondre quand vous voulez."))),
+    section("L'appli",
+      acc("Comment l'installer sur le téléphone ?", h("p", {}, "Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮, puis « Installer l'application ».")),
+      acc("À quoi sert la jauge immunitaire ?", h("p", {}, "Elle baisse au fil de la journée tant que vous n'avez pas écrit tous les deux, et remonte à 100 % quand les deux lettres sont scellées. Elle n'apparaît qu'une fois connecté."))));
 }
 $("openGuide").addEventListener("click", () => { renderGuide(); $("guide").showModal(); });
 $("closeGuide").addEventListener("click", () => $("guide").close());

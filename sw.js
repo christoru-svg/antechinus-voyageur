@@ -1,7 +1,7 @@
 // Garde l'appli ouvrable hors ligne. Réseau d'abord, cache en secours.
 // Les lettres, elles, passent par Firebase (qui a son propre cache hors ligne).
-const CACHE = "antechinus-v9";
-const SHELL = ["./", "index.html", "app.js?v=9", "config.js?v=9", "questions.js?v=9", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png"];
+const CACHE = "antechinus-v10";
+const SHELL = ["./", "index.html", "app.js?v=10", "config.js?v=10", "questions.js?v=10", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
