@@ -8,8 +8,8 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore,
   collection, doc, query, where, onSnapshot, setDoc, updateDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=12";
-import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=12";
+import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=13";
+import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=13";
 
 const NAMES = { luigi: "Luigi", kritas: "Les Kritas" };
 const TO = { luigi: "Luigi", kritas: "les Kritas" };          // en milieu de phrase
@@ -144,14 +144,8 @@ const authMsg = e => AUTH_ERRORS[e && e.code] || "La connexion a échoué. Rées
 
 /* ---------- Rendu : connexion ---------- */
 function renderAuth() {
-  const box = $("auth"), bar = $("meBar");
-  box.replaceChildren(); bar.replaceChildren();
-  bar.hidden = !(S.user && (S.phase === "ready" || S.phase === "verify" || S.phase === "stranger"));
-  if (!bar.hidden) {
-    bar.append(
-      h("span", {}, S.me ? `Connecté en tant que ${NAMES[S.me]}` : S.user.email),
-      h("button", { class: "link", type: "button", onclick: () => signOut(auth) }, "Se déconnecter"));
-  }
+  const box = $("auth");
+  box.replaceChildren();
 
   if (S.phase === "unconfigured") {
     box.hidden = false;
@@ -162,7 +156,8 @@ function renderAuth() {
   if (S.phase === "stranger") {
     box.hidden = false;
     box.append(h("h3", {}, "Ce terrier est réservé à Luigi et aux Kritas"),
-      h("p", { class: "status" }, `Le compte ${S.user.email} n'est pas invité. Connecte-toi avec l'adresse prévue dans config.js.`));
+      h("p", { class: "status" }, `Le compte ${S.user.email} n'est pas invité. Connecte-toi avec l'adresse prévue dans config.js.`),
+      h("div", { class: "row" }, h("button", { class: "btn ghost", type: "button", onclick: () => signOut(auth) }, "Se déconnecter")));
     return;
   }
   if (S.phase === "verify") {
@@ -368,17 +363,18 @@ function renderVitals() {
 
 /* ---------- La boîte à trésors ---------- */
 function renderTresors() {
-  const sec = $("tresors");
-  if (S.phase !== "ready") { sec.hidden = true; return; }
-  sec.hidden = false;
-  const kept = Object.values(S.mine).filter(l => l.kept && !l.removed).sort((a, b) => (a.date < b.date ? 1 : -1));
   const ul = $("tresorList");
+  if (S.phase !== "ready") {
+    ul.replaceChildren(h("li", { class: "empty" }, "Connecte-toi depuis l'accueil pour retrouver tes trésors."));
+    return;
+  }
+  const kept = Object.values(S.mine).filter(l => l.kept && !l.removed).sort((a, b) => (a.date < b.date ? 1 : -1));
   if (!kept.length) {
     ul.replaceChildren(h("li", { class: "empty" }, "Aucune lettre gardée pour l'instant. Une fois vos deux lettres ouvertes, touche « Garder précieusement » pour la ranger ici."));
     return;
   }
   ul.replaceChildren(...kept.map(l => h("li", { class: l.date === S.selected ? "current" : "" },
-    h("button", { type: "button", onclick: () => select(l.date) },
+    h("button", { type: "button", onclick: () => openDay(l.date) },
       h("span", { class: "d" }, fmtShort(l.date)),
       h("span", { class: "q" }, qFor(l.date)[1]),
       h("span", { class: "star", "aria-hidden": "true" }, "♥")))));
@@ -393,7 +389,30 @@ function renderSeason() {
     h("span", {}, "Questions spéciales jusqu'au 21 août. Les systèmes immunitaires chutent deux fois plus vite. Courage."));
 }
 
-function renderAll() { renderAuth(); renderSeason(); renderDay(); renderTresors(); renderTerrier(); renderVitals(); }
+/* ---------- Mon profil ---------- */
+function renderProfil() {
+  const body = $("profilBody");
+  if (!S.user) {
+    body.replaceChildren(h("div", { class: "profile" },
+      h("p", {}, "Tu n'es pas connecté au terrier."),
+      h("a", { class: "btn love", href: "#accueil", style: "align-self:flex-start;text-decoration:none" }, "Se connecter")));
+    return;
+  }
+  const avatar = h("div", { class: "avatar", "aria-hidden": "true" }); avatar.append(svgUse(56));
+  const letters = Object.values(S.mine).length;
+  const kept = Object.values(S.mine).filter(l => l.kept && !l.removed).length;
+  const days = Math.max(1, dayIndex(S.today) + 1);
+  body.replaceChildren(h("div", { class: "profile" },
+    h("div", { class: "who-row" }, avatar,
+      h("div", {}, h("div", { class: "name" }, S.me ? NAMES[S.me] : "Invité"), h("div", { class: "mail" }, S.user.email))),
+    S.phase === "ready" ? h("div", { class: "stats" },
+      h("div", {}, h("b", {}, letters), h("span", {}, letters > 1 ? "lettres écrites" : "lettre écrite")),
+      h("div", {}, h("b", {}, kept), h("span", {}, kept > 1 ? "trésors" : "trésor")),
+      h("div", {}, h("b", {}, days), h("span", {}, days > 1 ? "jours de terrier" : "jour de terrier"))) : null,
+    h("button", { class: "btn ghost", type: "button", style: "align-self:flex-start", onclick: () => { signOut(auth); location.hash = "#accueil"; } }, "Se déconnecter")));
+}
+
+function renderAll() { renderAuth(); renderSeason(); renderDay(); renderTresors(); renderTerrier(); renderVitals(); renderProfil(); }
 
 function select(k) {
   S.selected = k; watchPartner(); renderDay(); renderTresors(); renderTerrier();
@@ -581,13 +600,24 @@ function renderGuide() {
       h("div", { class: "guide-side" }, h("h2", { id: id + "-t" }, title), h("p", {}, sub)),
       h("div", { class: "guide-main" }, ...content))));
 }
-// Le mode d'emploi est une page à part : #mode-emploi.
+// Navigation par onglets : #accueil, #tresors, #plus (mode d'emploi), #profil.
+const VIEWS = { "#tresors": "tresorsPage", "#plus": "guidePage", "#mode-emploi": "guidePage", "#profil": "guidePage" };
+let scrollToDay = false;
 function route() {
-  const guide = location.hash === "#mode-emploi";
-  $("home").hidden = guide;
-  $("guidePage").hidden = !guide;
-  if (guide) renderGuide();
-  window.scrollTo(0, 0);
+  const view = VIEWS[location.hash] || "home";
+  for (const id of ["home", "tresorsPage", "guidePage"]) $(id).hidden = id !== view;
+  document.querySelectorAll(".tab").forEach(t => {
+    if (t.dataset.view === view) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
+  });
+  if (view === "guidePage") renderGuide();
+  if (view === "home" && scrollToDay) { scrollToDay = false; renderDay(); renderTerrier(); $("day").scrollIntoView({ block: "start" }); }
+  else window.scrollTo(0, 0);
+}
+// Depuis la boîte à trésors : ouvrir ce jour-là sur l'accueil.
+function openDay(date) {
+  S.selected = date; watchPartner();
+  scrollToDay = true;
+  if (location.hash === "#accueil") route(); else location.hash = "#accueil";
 }
 window.addEventListener("hashchange", route);
 route();
