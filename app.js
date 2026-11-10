@@ -379,6 +379,10 @@ function renderVitals() {
     S.today = keyOf(now); if (wasToday) S.selected = S.today;
     renderAll(); return;
   }
+  // La jauge dépend des lettres : on ne la montre qu'une fois connecté au terrier.
+  const showImmune = S.phase === "ready";
+  $("immuneVital").hidden = !showImmune;
+  if (!showImmune) return;
   const written = ["luigi", "kritas"].filter(r => wrote(S.today, r)).length;
   const hours = now.getHours() + now.getMinutes() / 60;
   let pct, sub;

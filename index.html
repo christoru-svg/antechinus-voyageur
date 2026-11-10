@@ -61,8 +61,8 @@ button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid va
 .hero svg{width:clamp(110px,26vw,150px);height:auto}
 
 /* Bandeau de survie */
-.vitals{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.vital{background:var(--paper);padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.vitals{display:flex;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.vital{flex:1 1 0;background:var(--paper);padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
 .vital .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .vital .val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
 .meter{height:8px;border-radius:99px;background:var(--gum-soft);overflow:hidden}
@@ -206,7 +206,7 @@ footer{font-size:12px;color:var(--muted);text-align:center}
       <span class="val" id="countdown">--:--:--</span>
       <span class="sub">Comme un antechinus mâle, elle ne passera pas la nuit.</span>
     </div>
-    <div class="vital">
+    <div class="vital" id="immuneVital" hidden>
       <span class="lbl">Système immunitaire du couple</span>
       <span class="val" id="immuneVal">100 %</span>
       <div class="meter" id="immuneBar"><i style="width:100%"></i></div>
