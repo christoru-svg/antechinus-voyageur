@@ -115,6 +115,9 @@ textarea{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line
 .fact button{margin-top:6px}
 .fact .src{font-size:12px;color:var(--muted);margin-top:4px}
 .fact .src a{color:var(--gum)}
+.letter .theme{max-width:calc(100% - 76px)}
+.expiry{font-size:13px;color:var(--muted);margin-top:-6px}
+.expiry .t{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
 .krita{display:flex;flex-direction:column;gap:8px}
 .krita .from{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .krita input{font:inherit;padding:8px 12px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);max-width:260px}
@@ -200,13 +203,8 @@ footer{font-size:12px;color:var(--muted);text-align:center}
     </svg>
   </header>
 
-  <section class="vitals" aria-label="Signes vitaux du couple">
-    <div class="vital">
-      <span class="lbl">La question du jour expire dans</span>
-      <span class="val" id="countdown">--:--:--</span>
-      <span class="sub">Comme un antechinus mâle, elle ne passera pas la nuit.</span>
-    </div>
-    <div class="vital" id="immuneVital" hidden>
+  <section class="vitals" id="vitals" aria-label="Signes vitaux du couple" hidden>
+    <div class="vital" id="immuneVital">
       <span class="lbl">Système immunitaire du couple</span>
       <span class="val" id="immuneVal">100 %</span>
       <div class="meter" id="immuneBar"><i style="width:100%"></i></div>

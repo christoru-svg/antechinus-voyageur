@@ -288,7 +288,9 @@ function renderDay() {
   const card = h("article", { class: "letter" },
     h("div", { class: "stamp", "aria-hidden": "true" }, svgUse(42)),
     h("span", { class: "theme" }, theme),
-    h("h2", { class: "question" }, question));
+    h("h2", { class: "question" }, question),
+    isToday ? h("p", { class: "expiry" }, "Expire dans ", h("span", { class: "t", id: "countdown" }, countdownText()),
+      ". Comme un antechinus mâle, elle ne passera pas la nuit.") : null);
 
   if (S.phase === "loading") {
     card.append(h("p", { class: "status" }, "L'antechinus fouille le terrier à la recherche de vos lettres…"));
@@ -369,11 +371,14 @@ function renderTerrier() {
 }
 
 /* ---------- Signes vitaux ---------- */
+function countdownText() {
+  const now = new Date(), mid = new Date(now); mid.setHours(24, 0, 0, 0);
+  const s = Math.max(0, Math.floor((mid - now) / 1000));
+  return `${Math.floor(s / 3600)} h ${pad(Math.floor(s / 60) % 60)} min ${pad(s % 60)} s`;
+}
 function renderVitals() {
   const now = new Date();
-  const mid = new Date(now); mid.setHours(24, 0, 0, 0);
-  const s = Math.max(0, Math.floor((mid - now) / 1000));
-  $("countdown").textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
+  const cd = $("countdown"); if (cd) cd.textContent = countdownText();
   if (keyOf(now) !== S.today) {
     const wasToday = S.selected === S.today;
     S.today = keyOf(now); if (wasToday) S.selected = S.today;
@@ -381,7 +386,7 @@ function renderVitals() {
   }
   // La jauge dépend des lettres : on ne la montre qu'une fois connecté au terrier.
   const showImmune = S.phase === "ready";
-  $("immuneVital").hidden = !showImmune;
+  $("vitals").hidden = !showImmune;
   if (!showImmune) return;
   const written = ["luigi", "kritas"].filter(r => wrote(S.today, r)).length;
   const hours = now.getHours() + now.getMinutes() / 60;
