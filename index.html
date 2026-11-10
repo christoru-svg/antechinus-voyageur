@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>L'Antechinus Voyageur</title>
+<meta name="description" content="Une question par jour pour Luigi et les Kritas, livrée par un antechinus amoureux.">
+<meta name="theme-color" content="#e9eee6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141c18" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Antechinus">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Kalam:wght@400;700&display=swap">
+<style>
+/* Layout : une colonne étroite façon lettre, le terrier de l'antechinus la nuit dans le bush australien. */
+:root{
+  --bg:#e9eee6;          /* feuille d'eucalyptus pâle */
+  --paper:#fbfaf4;       /* papier à lettres */
+  --ink:#1f2f27;         /* encre vert nuit */
+  --muted:#5d6e64;
+  --line:#c9d3c6;
+  --fur:#8a6a52;         /* pelage de l'antechinus */
+  --fur-dark:#5b4433;
+  --love:#c4335f;        /* museau rose, cœur */
+  --love-soft:#f6dbe3;
+  --gum:#3f6b55;         /* eucalyptus */
+  --gum-soft:#d6e4d9;
+  --warn:#b4661b;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --hand:"Kalam", "Comic Sans MS", "Segoe Print", cursive;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141c18;--paper:#1d2722;--ink:#e8eee6;--muted:#9eb0a5;--line:#34443b;
+  --fur:#b48e70;--fur-dark:#7d604b;--love:#ef7096;--love-soft:#3f2330;
+  --gum:#8cc2a5;--gum-soft:#24362d;--warn:#e7a35c;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141c18;--paper:#1d2722;--ink:#e8eee6;--muted:#9eb0a5;--line:#34443b;
+  --fur:#b48e70;--fur-dark:#7d604b;--love:#ef7096;--love-soft:#3f2330;
+  --gum:#8cc2a5;--gum-soft:#24362d;--warn:#e7a35c;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:calc(24px + env(safe-area-inset-top, 0px)) calc(64px + env(safe-area-inset-bottom, 0px));margin:0;min-height:100vh}
+.wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.1}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--love);outline-offset:2px}
+
+/* En-tête */
+.hero{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.hero h1{font-size:clamp(30px,7vw,44px);font-weight:800;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;color:var(--love)}
+.hero .tag{color:var(--muted);margin-top:8px;max-width:38ch}
+.hero svg{width:clamp(110px,26vw,150px);height:auto}
+
+/* Bandeau de survie */
+.vitals{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.vital{background:var(--paper);padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.vital .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.vital .val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.meter{height:8px;border-radius:99px;background:var(--gum-soft);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--gum);transition:width .6s}
+.meter.low i{background:var(--warn)}
+.meter.crit i{background:var(--love)}
+.vital .sub{font-size:12px;color:var(--muted)}
+
+/* Choix d'identité */
+.who{background:var(--paper);border:1px dashed var(--fur);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.who .row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:0;border-radius:999px;padding:11px 20px;font-weight:600;background:var(--ink);color:var(--paper)}
+.btn.love{background:var(--love);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;font-size:13px}
+
+/* La lettre du jour */
+.day-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.day-head .num{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.letter{background:var(--paper);border-radius:6px 22px 6px 6px;padding:22px 20px 20px;position:relative;
+  box-shadow:0 1px 0 var(--line),0 14px 30px -18px rgba(31,47,39,.45);display:flex;flex-direction:column;gap:14px}
+.stamp{position:absolute;top:14px;right:14px;width:58px;height:66px;border:2px dashed var(--love);border-radius:4px;
+  display:grid;place-items:center;transform:rotate(6deg);background:var(--love-soft)}
+.stamp svg{width:42px}
+.theme{align-self:flex-start;font-size:12px;font-weight:600;letter-spacing:.04em;padding:4px 10px;border-radius:99px;background:var(--gum-soft);color:var(--gum)}
+.question{font-size:clamp(22px,5vw,28px);font-weight:600;letter-spacing:-.01em;padding-right:70px}
+textarea{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:14px;
+  font-family:var(--hand);font-size:20px;line-height:1.45;background:
+  repeating-linear-gradient(var(--paper) 0 28px, var(--line) 28px 29px);color:var(--ink);background-attachment:local}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.status{font-size:14px;color:var(--muted)}
+.actions .status{flex:1 1 220px}
+.status b{color:var(--ink)}
+
+.envelope{border-top:1px dashed var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
+.envelope .from{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.handwritten{font-family:var(--hand);font-size:20px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.sealed{display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;background:var(--love-soft);color:var(--ink)}
+.sealed .wax{flex:none;width:44px;height:44px;border-radius:50%;background:var(--love);display:grid;place-items:center;color:#fff;font-weight:800}
+.reactions{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--love);border-color:var(--love);color:#fff}
+.reacted{font-size:13px;color:var(--love);font-weight:600}
+
+/* Fait du jour */
+.fact{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;padding:16px;border-radius:14px;background:var(--gum-soft)}
+.fact .k{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gum);font-weight:800}
+.fact p{font-size:15px}
+.fact button{margin-top:6px}
+.fact .src{font-size:12px;color:var(--muted);margin-top:4px}
+.fact .src a{color:var(--gum)}
+.krita{display:flex;flex-direction:column;gap:8px}
+.krita .from{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.krita input{font:inherit;padding:8px 12px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);max-width:260px}
+.fact svg{width:44px}
+
+/* Le terrier */
+.terrier h2,.how h2{font-size:22px;font-weight:800}
+.terrier .intro{color:var(--muted);font-size:14px;margin-top:4px}
+.list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.list li{border-bottom:1px solid var(--line)}
+.list button{width:100%;text-align:left;background:none;border:0;padding:12px 2px;display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;color:var(--ink)}
+.list button:hover{background:var(--paper)}
+.list .d{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.list .q{font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dots{display:flex;gap:4px}
+.dots span{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--fur)}
+.dots span.on{background:var(--fur)}
+.list li.current button{background:var(--paper)}
+
+.how ol{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:12px;counter-reset:s}
+.how li{display:grid;grid-template-columns:32px 1fr;gap:10px;counter-increment:s}
+.how li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:800;font-size:14px}
+.how li b{display:block}
+.how li span{color:var(--muted);font-size:14px}
+
+.notice{padding:12px 14px;border-radius:10px;border:1px solid var(--line);font-size:14px;color:var(--muted);background:var(--paper)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);
+  padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px);text-align:center;z-index:20}
+footer{font-size:12px;color:var(--muted);text-align:center}
+
+@media (max-width:460px){
+  .hero{grid-template-columns:1fr}
+  .hero svg{justify-self:start;order:-1;width:110px}
+  .question{padding-right:0;padding-top:58px}
+  .list button{grid-template-columns:58px 1fr auto}
+}
+@media (prefers-reduced-motion:no-preference){
+  .tail{transform-origin:20px 70px;animation:wag 3.2s ease-in-out infinite}
+  .heart{transform-origin:110px 48px;animation:beat 1.6s ease-in-out infinite}
+}
+@keyframes wag{0%,100%{transform:rotate(0)}50%{transform:rotate(-6deg)}}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}}
+[hidden]{display:none!important}
+/* Connexion */
+.auth{background:var(--paper);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px;border:1px dashed var(--fur)}
+.auth label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.auth input{font:inherit;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.auth .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.auth .err{color:var(--love);font-size:14px}
+.me-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="antechinus">
+      <path class="tail" d="M28 74 C 6 78, 0 92, 12 104" fill="none" stroke="var(--fur-dark)" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="52" cy="76" rx="30" ry="22" fill="var(--fur)"/>
+      <ellipse cx="54" cy="84" rx="18" ry="10" fill="var(--paper)" opacity=".35"/>
+      <path d="M66 50 Q 92 50 104 66 Q 92 76 70 74 Z" fill="var(--fur)"/>
+      <circle cx="68" cy="60" r="16" fill="var(--fur)"/>
+      <circle cx="60" cy="46" r="8" fill="var(--fur-dark)"/>
+      <circle cx="60" cy="46" r="4" fill="var(--love-soft)"/>
+      <circle cx="80" cy="58" r="3.4" fill="var(--ink)"/>
+      <circle cx="81" cy="57" r="1" fill="var(--paper)"/>
+      <circle cx="104" cy="66" r="3" fill="var(--love)"/>
+      <path d="M40 96 l-4 8 M62 96 l4 8" stroke="var(--fur-dark)" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <h1>L'Antechinus <em>Voyageur</em></h1>
+      <p class="tag">Une question par jour pour Luigi et les Kritas. Chacun écrit sa lettre, elle reste scellée jusqu'à ce que l'autre ait écrit la sienne. À la manière de l'antechinus : on donne tout, tout de suite.</p>
+    </div>
+    <svg viewBox="0 0 220 120" role="img" aria-label="Deux antechinus amoureux et un cœur">
+      <use href="#antechinus" transform="translate(-6 4)"/>
+      <use href="#antechinus" transform="translate(226 4) scale(-1 1)"/>
+      <path class="heart" d="M110 40 C 100 26, 84 34, 92 46 L 110 62 L 128 46 C 136 34, 120 26, 110 40 Z" fill="var(--love)"/>
+    </svg>
+  </header>
+
+  <section class="vitals" aria-label="Signes vitaux du couple">
+    <div class="vital">
+      <span class="lbl">La question du jour expire dans</span>
+      <span class="val" id="countdown">--:--:--</span>
+      <span class="sub">Comme un antechinus mâle, elle ne passera pas la nuit.</span>
+    </div>
+    <div class="vital">
+      <span class="lbl">Système immunitaire du couple</span>
+      <span class="val" id="immuneVal">100 %</span>
+      <div class="meter" id="immuneBar"><i style="width:100%"></i></div>
+      <span class="sub" id="immuneSub">Chaque lettre écrite le régénère.</span>
+    </div>
+  </section>
+
+  <section id="auth" class="auth" hidden></section>
+  <div class="me-bar" id="meBar" hidden></div>
+
+  <section id="day" aria-live="polite"></section>
+
+  <section class="fact" aria-label="Le fait antechinus du jour">
+    <svg viewBox="0 0 110 110" aria-hidden="true"><use href="#antechinus"/></svg>
+    <div>
+      <div class="k">Fait antechinus pas du tout rassurant</div>
+      <p id="factText"></p>
+      <p class="src">Source : <a id="factSource" href="#" target="_blank" rel="noopener"></a></p>
+      <button class="link" id="factNext" type="button">Un autre, avant qu'il ne soit trop tard</button>
+    </div>
+  </section>
+
+  <section class="terrier">
+    <h2>Le terrier</h2>
+    <p class="intro">Les questions des jours passés. Celles que vous n'avez pas encore écrites vous attendent, contrairement à l'antechinus.</p>
+    <ul class="list" id="terrierList"></ul>
+  </section>
+
+  <section class="how">
+    <h2>Comment ça marche</h2>
+    <ol>
+      <li><div><b>Une question arrive chaque matin</b><span>Légère, tendre, intime ou franchement marsupiale.</span></div></li>
+      <li><div><b>Chacun écrit sa lettre</b><span>Elle reste scellée tant que l'autre n'a pas écrit la sienne. Impossible de s'influencer, impossible de copier.</span></div></li>
+      <li><div><b>L'antechinus livre</b><span>Les deux lettres s'ouvrent. Vous réagissez, vous en parlez le soir, et votre système immunitaire remonte.</span></div></li>
+    </ol>
+  </section>
+
+  <footer>Aucun antechinus n'a été épuisé pendant la fabrication de cette page. Enfin, presque.</footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

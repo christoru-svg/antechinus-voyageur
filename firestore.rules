@@ -1,0 +1,60 @@
+rules_version = '2';
+
+// Le terrier n'ouvre qu'à deux adresses e-mail (en minuscules), les mêmes que dans config.js.
+// Une lettre n'est lisible par l'autre que si l'autre a déjà écrit la sienne le même jour :
+// le sceau est garanti par le serveur, pas seulement par l'interface.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function luigi()   { return 'chris.depaola.toru@gmail.com'; }
+    function kritas()  { return 'elarchi.lilas@hotmail.fr'; }
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function role() {
+      return request.auth.token.email.lower() == luigi() ? 'luigi'
+           : request.auth.token.email.lower() == kritas() ? 'kritas'
+           : 'personne';
+    }
+    function couple() {
+      return signedIn() && role() != 'personne';
+    }
+
+    // letters/{AAAA-MM-JJ}_{luigi|kritas}   author = la Krita qui a écrit
+    match /letters/{id} {
+      allow read: if couple() && (
+        resource.data.role == role() ||
+        exists(/databases/$(database)/documents/letters/$(resource.data.date + '_' + role()))
+      );
+      allow create: if couple()
+        && request.resource.data.role == role()
+        && id == request.resource.data.date + '_' + role()
+        && request.resource.data.date is string
+        && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 8000
+        && request.resource.data.keys().hasOnly(['date', 'role', 'text', 'at', 'author'])
+        && (!('author' in request.resource.data) ||
+            (request.resource.data.author is string && request.resource.data.author.size() <= 40));
+      // Une lettre scellée ne se modifie plus : seule la réaction à la lettre de l'autre peut changer.
+      allow update: if couple()
+        && resource.data.role == role()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reaction']);
+      allow delete: if false;
+    }
+
+    // status/{AAAA-MM-JJ} = { luigi: true, kritas: true } : qui a écrit, sans le contenu.
+    match /status/{date} {
+      allow read: if couple();
+      allow create: if couple()
+        && request.resource.data.keys().hasOnly([role()])
+        && request.resource.data[role()] == true;
+      allow update: if couple()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([role()])
+        && request.resource.data[role()] == true;
+      allow delete: if false;
+    }
+  }
+}
