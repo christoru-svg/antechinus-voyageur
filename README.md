@@ -61,9 +61,17 @@ puis <http://localhost:8000>. (`localhost` est autorisé par défaut dans Fireba
 
 La liste est dans `KRITAS`, en haut de `app.js`. Une Krita absente de la liste peut aussi taper son nom dans « Une autre Krita… » au moment d'écrire.
 
-## Changer les questions
+## Les questions
 
-Elles sont dans le tableau `Q` en haut de `app.js` : `["Thème", "Question ?"]`. La question du jour dépend du nombre de jours depuis `START` (`config.js`). Ajoute les nouvelles questions **à la fin** du tableau avant d'en avoir fait le tour (60 jours) : les jours passés gardent alors leur question.
+Tout est dans `questions.js` :
+- `Q` : 365 questions, une par jour depuis `START`. Pour en ajouter, mets-les **à la fin** : les jours passés gardent leur question.
+- `SEASON` : la saison des amours de l'antechinus, du 1er au 21 août (questions plus coquines, jauge qui chute deux fois plus vite).
+- `FIXED` : Nouvel An, Saint-Valentin, Réveillon, Noël, 31 décembre.
+- `PERSONAL` : vos dates, à régler dans `config.js` (`DATES` : rencontre, anniversaires).
+
+## La boîte à trésors
+
+Une fois les deux lettres d'un jour ouvertes, « Garder précieusement » range l'échange dans la boîte à trésors (chacun a la sienne).
 
 ## Coût
 

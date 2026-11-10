@@ -17,5 +17,12 @@ export const COUPLE = {
   kritas: "elarchi.lilas@hotmail.fr"
 };
 
-// 3. Le jour de la lettre n° 1 (AAAA-MM-JJ).
+// 3. Vos dates (format "MM-JJ", par ex. "06-21"). Laisse "" si tu ne veux pas de question spéciale.
+export const DATES = {
+  rencontre: "",          // anniversaire de votre rencontre
+  anniversaireLuigi: "",
+  anniversaireKritas: ""
+};
+
+// 4. Le jour de la lettre n° 1 (AAAA-MM-JJ).
 export const START = "2026-11-10";

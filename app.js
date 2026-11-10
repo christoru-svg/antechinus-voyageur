@@ -8,7 +8,8 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore,
   collection, doc, query, where, onSnapshot, setDoc, updateDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, COUPLE, START } from "./config.js?v=6";
+import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=7";
+import { Q, SEASON, SEASON_START, FIXED, PERSONAL } from "./questions.js?v=7";
 
 const NAMES = { luigi: "Luigi", kritas: "Les Kritas" };
 const TO = { luigi: "Luigi", kritas: "les Kritas" };          // en milieu de phrase
@@ -23,68 +24,6 @@ const REACTIONS = [
   ["rire", "J'ai ri dans mon terrier"]
 ];
 
-const Q = [
-  ["Avant le crash immunitaire", "Quel est le tout premier détail de moi que tu as remarqué ?"],
-  ["Si on n'avait que 15 heures", "S'il ne nous restait que 15 heures ensemble, qu'est-ce qu'on ferait en premier ?"],
-  ["Petites manies de marsupial", "Quelle petite manie chez moi te fait sourire en cachette ?"],
-  ["Devine-moi", "Selon toi, quel est mon repas réconfort absolu, et pourquoi ?"],
-  ["Saison des amours", "Quel moment avec moi t'a donné l'impression que le temps s'arrêtait ?"],
-  ["Le terrier", "Qu'est-ce qui rend notre chez-nous vraiment à nous ?"],
-  ["Gratitude avant extinction", "Qu'est-ce que j'ai fait cette semaine qui t'a fait du bien ?"],
-  ["Demain (si on survit)", "Où est-ce que tu nous imagines dans cinq ans, un mardi soir ?"],
-  ["Avant le crash immunitaire", "Raconte notre premier rendez-vous de ton point de vue. Sans tricher."],
-  ["Si on n'avait que 15 heures", "Un antechinus te propose d'échanger ta vie contre la sienne pour une journée. Que fais-tu de ses 15 heures ?"],
-  ["Petites manies de marsupial", "Quelle habitude de couple on a créée sans s'en rendre compte ?"],
-  ["Devine-moi", "Quelle chanson me met de bonne humeur à coup sûr ?"],
-  ["Saison des amours", "Quel geste de moi te donne le plus envie de te rapprocher ?"],
-  ["Le terrier", "Si on devait refaire une pièce de la maison ensemble, laquelle et comment ?"],
-  ["Gratitude avant extinction", "Quelle qualité chez moi tu aimerais avoir un peu plus ?"],
-  ["Demain (si on survit)", "Quel voyage on n'a pas encore fait et qu'on devrait faire avant que nos systèmes immunitaires ne lâchent ?"],
-  ["Avant le crash immunitaire", "À quel moment as-tu su que ça devenait sérieux entre nous ?"],
-  ["Si on n'avait que 15 heures", "Si on se réveillait demain en antechinus, quelle serait notre première dispute ?"],
-  ["Petites manies de marsupial", "Qu'est-ce que je fais quand je crois que personne ne me regarde ?"],
-  ["Devine-moi", "Quelle est la chose qui m'agace le plus et que je n'ose pas dire ?"],
-  ["Saison des amours", "Quel compliment de ma part tu n'as jamais oublié ?"],
-  ["Le terrier", "Quel est ton moment préféré de nos dimanches ?"],
-  ["Gratitude avant extinction", "Dans quelle situation mon aide a le plus compté pour toi, sans que je le sache ?"],
-  ["Demain (si on survit)", "Quelle petite tradition aimerais-tu qu'on démarre cette année ?"],
-  ["Avant le crash immunitaire", "Quel souvenir de nous te fait encore sourire rien qu'en y pensant ?"],
-  ["Si on n'avait que 15 heures", "On a 15 heures et pas de téléphone. Écris le programme minute par minute."],
-  ["Petites manies de marsupial", "Quel mot ou quelle expression j'utilise trop souvent ?"],
-  ["Devine-moi", "Quel est mon plus grand rêve que je n'ai jamais vraiment dit à voix haute ?"],
-  ["Saison des amours", "Décris-moi en trois mots, mais uniquement des mots qu'un naturaliste utiliserait pour un marsupial."],
-  ["Le terrier", "Quel objet chez nous a la meilleure histoire ?"],
-  ["Gratitude avant extinction", "Merci pour quoi, aujourd'hui, précisément ?"],
-  ["Demain (si on survit)", "Qu'est-ce que tu aimerais apprendre avec moi ?"],
-  ["Avant le crash immunitaire", "Quelle était ta plus grande peur au début de notre histoire ?"],
-  ["Si on n'avait que 15 heures", "Quelle dernière lettre d'amour un antechinus devrait écrire avant la fin de la saison ? Écris-la pour moi."],
-  ["Petites manies de marsupial", "Quel est mon rituel du matin, vu de l'extérieur ?"],
-  ["Devine-moi", "Si je pouvais changer de métier demain, je choisirais quoi ?"],
-  ["Saison des amours", "Qu'est-ce que tu trouves irrésistible chez moi et que je ne soupçonne pas ?"],
-  ["Le terrier", "Quelle est la règle non écrite la plus importante de notre maison ?"],
-  ["Gratitude avant extinction", "Quelle dispute nous a finalement rendus plus forts ?"],
-  ["Demain (si on survit)", "Comment tu imagines nos vieux jours ? Sois précis, c'est un luxe que l'antechinus n'a pas."],
-  ["Avant le crash immunitaire", "Quel lieu associes-tu le plus à nous deux ?"],
-  ["Si on n'avait que 15 heures", "Si nos systèmes immunitaires s'effondraient ce soir, quel plat voudrais-tu partager une dernière fois ?"],
-  ["Petites manies de marsupial", "Quelle petite chose que je fais te plaît plus que je ne le pense ?"],
-  ["Devine-moi", "Qu'est-ce qui me rassure le plus quand le stress monte ?"],
-  ["Saison des amours", "Si nous pouvions nous échapper tous les deux demain matin, où m'emmènerais-tu ?"],
-  ["Le terrier", "Qu'est-ce qu'on devrait arrêter de faire à la maison, honnêtement ?"],
-  ["Gratitude avant extinction", "Quel moment difficile as-tu traversé plus facilement grâce à nous ?"],
-  ["Demain (si on survit)", "Quel défi un peu fou on pourrait se lancer ensemble cette année ?"],
-  ["Avant le crash immunitaire", "Qu'est-ce que tu as pensé de moi la première fois, avant de vraiment me connaître ?"],
-  ["Si on n'avait que 15 heures", "L'antechinus donne tout en une saison. Qu'est-ce que tu ne veux surtout pas remettre à plus tard avec moi ?"],
-  ["Petites manies de marsupial", "Quel bruit, quelle odeur ou quel geste te fait immédiatement penser à moi ?"],
-  ["Devine-moi", "Quel film je pourrais revoir dix fois sans m'en lasser ?"],
-  ["Saison des amours", "Quel souvenir tendre aimerais-tu qu'on recrée ?"],
-  ["Le terrier", "Notre terrier idéal : où, quelle taille, quelle vue ?"],
-  ["Gratitude avant extinction", "Qu'est-ce que tu admires dans la façon dont je traite les autres ?"],
-  ["Demain (si on survit)", "Quelle version de nous deux tu aimerais rencontrer dans dix ans ?"],
-  ["Si on n'avait que 15 heures", "Tu as 15 heures pour me faire craquer une seconde fois. Quel est ton plan ?"],
-  ["Petites manies de marsupial", "Si tu devais écrire le mode d'emploi de moi, quelle serait la première ligne ?"],
-  ["Devine-moi", "Qu'est-ce qui me rend le plus fier, sans que je m'en vante jamais ?"],
-  ["Saison des amours", "Un antechinus mâle peut s'accoupler jusqu'à 14 heures d'affilée. Quelle est ta définition d'une soirée parfaite, en durée raisonnable ?"]
-];
 
 const SRC = {
   conv: ["The Conversation, D. Fisher (2013)", "https://theconversation.com/doing-it-to-death-suicidal-sex-in-marsupial-mice-18884"],
@@ -110,7 +49,24 @@ const pad = n => String(n).padStart(2, "0");
 const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const toUTC = k => { const [y, m, d] = k.split("-").map(Number); return Date.UTC(y, m - 1, d); };
 const dayIndex = k => Math.round((toUTC(k) - toUTC(START)) / 86400000);
-const qFor = k => { const i = dayIndex(k); return Q[((i % Q.length) + Q.length) % Q.length]; };
+// Saison des amours de l'antechinus : SEASON.length jours à partir de SEASON_START (MM-JJ).
+function seasonDay(k) {
+  const y = k.slice(0, 4);
+  const d = Math.round((toUTC(k) - toUTC(`${y}-${SEASON_START}`)) / 86400000);
+  return d >= 0 && d < SEASON.length ? d : -1;
+}
+// [thème, question, genre] : "special" (vos dates, fêtes), "season" (saison des amours) ou "" (question du jour).
+function qFor(k) {
+  const md = k.slice(5);
+  for (const [key, val] of Object.entries(DATES || {})) {
+    if (val && val.slice(-5) === md && PERSONAL[key]) return [...PERSONAL[key], "special"];
+  }
+  if (FIXED[md]) return [...FIXED[md], "special"];
+  const s = seasonDay(k);
+  if (s >= 0) return ["Saison des amours (la vraie)", SEASON[s], "season"];
+  const i = dayIndex(k);
+  return [...Q[((i % Q.length) + Q.length) % Q.length], ""];
+}
 const asDate = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
 const fmtShort = k => asDate(k).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 const fmtLong = k => asDate(k).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
@@ -273,7 +229,7 @@ const checkVerified = () => busyDo(async () => {
 function renderDay() {
   const box = $("day");
   const date = S.selected;
-  const [theme, question] = qFor(date);
+  const [theme, question, kind] = qFor(date);
   const isToday = date === S.today;
   const n = dayIndex(date) + 1;
   const mine = S.me, oth = other();
@@ -285,7 +241,7 @@ function renderDay() {
     h("span", { class: "num" }, n > 0 ? `Lettre n° ${n} · ${fmtLong(date)}` : fmtLong(date)),
     !isToday ? h("button", { class: "link", type: "button", onclick: () => select(S.today) }, "Revenir à aujourd'hui") : null);
 
-  const card = h("article", { class: "letter" },
+  const card = h("article", { class: "letter" + (kind ? " " + kind : "") },
     h("div", { class: "stamp", "aria-hidden": "true" }, svgUse(42)),
     h("span", { class: "theme" }, theme),
     h("h2", { class: "question" }, question),
@@ -326,7 +282,11 @@ function renderDay() {
           ...REACTIONS.map(([k, label]) => h("button", {
             class: "chip", type: "button", "aria-pressed": myL.reaction === k ? "true" : "false",
             disabled: S.busy, onclick: () => react(date, myL.reaction === k ? null : k)
-          }, label)))));
+          }, label))),
+        h("button", {
+          class: "keep", type: "button", "aria-pressed": myL.kept ? "true" : "false", disabled: S.busy,
+          onclick: () => keep(date, !myL.kept)
+        }, myL.kept ? "Gardée dans la boîte à trésors" : "Garder précieusement")));
     }
   }
   box.replaceChildren(head, card);
@@ -392,7 +352,7 @@ function renderVitals() {
   const hours = now.getHours() + now.getMinutes() / 60;
   let pct, sub;
   if (written === 2) { pct = 100; sub = "Deux lettres échangées. Immunité au maximum, contrairement à un antechinus en novembre."; }
-  else { pct = Math.max(3, Math.round(100 - hours * (written ? 2 : 4))); sub = written ? "Une lettre sur deux. Ça tient, mais ça tousse." : "Aucune lettre aujourd'hui. Les anticorps s'inquiètent."; }
+  else { const speed = seasonDay(S.today) >= 0 ? 2 : 1; pct = Math.max(3, Math.round(100 - hours * (written ? 2 : 4) * speed)); sub = written ? "Une lettre sur deux. Ça tient, mais ça tousse." : "Aucune lettre aujourd'hui. Les anticorps s'inquiètent."; }
   $("immuneVal").textContent = `${pct} %`;
   const bar = $("immuneBar");
   bar.className = "meter" + (pct < 25 ? " crit" : pct < 55 ? " low" : "");
@@ -400,10 +360,37 @@ function renderVitals() {
   $("immuneSub").textContent = sub;
 }
 
-function renderAll() { renderAuth(); renderDay(); renderTerrier(); renderVitals(); }
+/* ---------- La boîte à trésors ---------- */
+function renderTresors() {
+  const sec = $("tresors");
+  if (S.phase !== "ready") { sec.hidden = true; return; }
+  sec.hidden = false;
+  const kept = Object.values(S.mine).filter(l => l.kept).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const ul = $("tresorList");
+  if (!kept.length) {
+    ul.replaceChildren(h("li", { class: "empty" }, "Aucune lettre gardée pour l'instant. Une fois vos deux lettres ouvertes, touche « Garder précieusement » pour la ranger ici."));
+    return;
+  }
+  ul.replaceChildren(...kept.map(l => h("li", { class: l.date === S.selected ? "current" : "" },
+    h("button", { type: "button", onclick: () => select(l.date) },
+      h("span", { class: "d" }, fmtShort(l.date)),
+      h("span", { class: "q" }, qFor(l.date)[1]),
+      h("span", { class: "star", "aria-hidden": "true" }, "♥")))));
+}
+
+/* ---------- Saison des amours ---------- */
+function renderSeason() {
+  const d = seasonDay(S.today), el = $("season");
+  el.hidden = d < 0;
+  if (d >= 0) el.replaceChildren(
+    h("b", {}, `Saison des amours de l'antechinus · jour ${d + 1} sur ${SEASON.length}`),
+    h("span", {}, "Questions spéciales jusqu'au 21 août. Les systèmes immunitaires chutent deux fois plus vite. Courage."));
+}
+
+function renderAll() { renderAuth(); renderSeason(); renderDay(); renderTresors(); renderTerrier(); renderVitals(); }
 
 function select(k) {
-  S.selected = k; watchPartner(); renderDay(); renderTerrier();
+  S.selected = k; watchPartner(); renderDay(); renderTresors(); renderTerrier();
   $("day").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
 }
 
@@ -484,6 +471,11 @@ async function writeLetter(date, text) {
     setDraft(date, "");
     S.krita = "";
   }, "Lettre scellée. L'antechinus est parti, à toute vitesse.");
+}
+
+async function keep(date, on) {
+  await guard(() => updateDoc(doc(db, "letters", `${date}_${S.me}`), { kept: on ? true : deleteField() }),
+    on ? "Rangée dans la boîte à trésors. Elle survivra à la saison." : "Retirée de la boîte à trésors.");
 }
 
 async function react(date, k) {
