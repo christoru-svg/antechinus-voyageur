@@ -8,8 +8,8 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore,
   collection, doc, query, where, onSnapshot, setDoc, updateDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=10";
-import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=10";
+import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=12";
+import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=12";
 
 const NAMES = { luigi: "Luigi", kritas: "Les Kritas" };
 const TO = { luigi: "Luigi", kritas: "les Kritas" };          // en milieu de phrase
@@ -544,36 +544,55 @@ function renderOnboarding() {
   $("onboarding").querySelector(".ob-art").replaceWith(svgUse(64));
 }
 
+// Typographie française : espace insécable avant ? ! : ; » et après «.
+const nbsp = t => t.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
 function renderGuide() {
   const role = S.me || "luigi";
-  const acc = (title, body, open = false) =>
-    h("details", { class: "acc", open }, h("summary", {}, title), h("div", { class: "acc-body" }, body));
-  const section = (title, ...items) => h("section", { class: "guide-sec" }, h("h3", {}, title), ...items);
-  $("guideBody").replaceChildren(
-    h("button", { class: "replay", type: "button", onclick: () => { $("guide").close(); openOnboarding(); } }, "Rejouer l'onboarding"),
-    section("Comment ça marche",
-      ...steps(role).map(([t, p], i) => acc(`${i + 1}. ${t}`, h("p", {}, p), i === 0))),
-    section("Les thèmes",
-      acc(`Les ${THEMES.length} thèmes du quotidien`,
-        h("dl", { class: "themes" }, ...THEMES.flatMap(([t, d]) => [h("dt", {}, t), h("dd", {}, d)]))),
-      acc("Saison des amours (la vraie)", h("p", {}, "Du 1er au 21 août, comme chez l'antechinus brun : 21 questions plus coquines, un bandeau dédié et une jauge qui chute deux fois plus vite.")),
-      acc("Les fêtes", h("p", {}, "Nouvel An, Saint-Valentin, Réveillon, Noël et 31 décembre ont leur propre question, avec une lettre encadrée en rose.")),
-      acc("Vos dates", h("p", {}, "Le 13 août (votre rencontre), le 26 octobre (anniversaire des Kritas) et le 26 novembre (anniversaire de Luigi)."))),
-    section("Les lettres",
-      acc("Qui peut lire nos lettres ?", h("p", {}, "Seulement vous deux : la base n'accepte que vos deux adresses e-mail, et chaque lettre reste fermée tant que l'autre n'a pas écrit la sienne.")),
-      acc("Peut-on modifier une lettre ?", h("p", {}, "Non. Une fois scellée, elle est envoyée telle quelle. Seules la réaction, la boîte à trésors et le retrait changent ensuite.")),
-      acc("Que fait « Garder précieusement » ?", h("p", {}, "Une fois les deux lettres d'un jour ouvertes, l'échange est rangé dans ta boîte à trésors, sous la lettre du jour. Chacun a la sienne.")),
-      acc("Que fait « Retirer cette lettre » ?", h("p", {}, "La lettre de l'autre n'apparaît plus pour toi. Elle n'est pas supprimée : tu peux la remettre depuis le même jour, dans le terrier.")),
-      acc("Et si on rate un jour ?", h("p", {}, "La question reste dans le terrier, en bas de la page. Vous pouvez y répondre quand vous voulez."))),
-    section("L'appli",
-      acc("Comment l'installer sur le téléphone ?", h("p", {}, "Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮, puis « Installer l'application ».")),
-      acc("À quoi sert la jauge immunitaire ?", h("p", {}, "Elle baisse au fil de la journée tant que vous n'avez pas écrit tous les deux, et remonte à 100 % quand les deux lettres sont scellées. Elle n'apparaît qu'une fois connecté."))));
+  const acc = (title, body, { open = false, num = null } = {}) =>
+    h("details", { class: "acc", open },
+      h("summary", {}, num ? h("span", { class: "num" }, num) : null, h("span", { class: "q" }, nbsp(title)), h("span", { class: "chev", "aria-hidden": "true" })),
+      h("div", { class: "acc-body" }, body));
+  const SECTIONS = [
+    ["g-rituel", "Comment ça marche", "Le rituel en trois temps, de la question à la lecture.",
+      h("div", { class: "card" }, ...steps(role).map(([t, p], i) => acc(t, h("p", {}, p), { open: i === 0, num: i + 1 })))],
+    ["g-themes", "Les thèmes", "Douze thèmes qui tournent au fil des jours, et quelques dates qui changent tout.",
+      h("div", { class: "card theme-grid" }, ...THEMES.map(([t, d]) => h("div", { class: "theme-item" }, h("b", {}, t), h("span", {}, d)))),
+      h("div", { class: "card" },
+        acc("Saison des amours (la vraie)", h("p", {}, "Du 1er au 21 août, comme chez l'antechinus brun : 21 questions plus coquines, un bandeau dédié et une jauge qui chute deux fois plus vite.")),
+        acc("Les fêtes", h("p", {}, "Nouvel An, Saint-Valentin, Réveillon, Noël et 31 décembre ont leur propre question, avec une lettre encadrée en rose.")),
+        acc("Vos dates", h("p", {}, "Le 13 août pour votre rencontre, le 26 octobre pour l'anniversaire des Kritas, le 26 novembre pour celui de Luigi.")))],
+    ["g-lettres", "Les lettres", "Le sceau, la boîte à trésors, et ce qu'on peut changer après coup.",
+      h("div", { class: "card" },
+        acc("Qui peut lire nos lettres ?", h("p", {}, "Seulement vous deux. La base n'accepte que vos deux adresses e-mail, et chaque lettre reste fermée tant que l'autre n'a pas écrit la sienne.")),
+        acc("Peut-on modifier une lettre ?", h("p", {}, "Non. Une fois scellée, elle part telle quelle. Seules la réaction, la boîte à trésors et le retrait changent ensuite.")),
+        acc("Que fait « Garder précieusement » ?", h("p", {}, "Une fois les deux lettres d'un jour ouvertes, l'échange rejoint ta boîte à trésors, sous la lettre du jour. Chacun a la sienne.")),
+        acc("Que fait « Retirer cette lettre » ?", h("p", {}, "La lettre de l'autre n'apparaît plus pour toi. Elle n'est pas supprimée : tu peux la remettre depuis le même jour, dans le terrier.")),
+        acc("Et si on rate un jour ?", h("p", {}, "La question reste dans le terrier, en bas de la page. Vous pouvez y répondre quand vous voulez.")))],
+    ["g-appli", "L'appli", "L'installer sur le téléphone et comprendre ce qui s'affiche.",
+      h("div", { class: "card" },
+        acc("Comment l'installer sur le téléphone ?", h("p", {}, "Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮, puis « Installer l'application ».")),
+        acc("À quoi sert la jauge immunitaire ?", h("p", {}, "Elle baisse au fil de la journée tant que vous n'avez pas écrit tous les deux, et remonte à 100 % quand les deux lettres sont scellées. Elle n'apparaît qu'une fois connecté.")),
+        acc("La page n'affiche pas la dernière version", h("p", {}, "Ferme complètement l'appli puis rouvre-la. Si ça ne suffit pas, efface les données du site dans les réglages du navigateur : tes lettres sont en sécurité dans la base.")))]
+  ];
+  $("guideToc").replaceChildren(...SECTIONS.map(([id, title]) =>
+    h("button", { class: "chip", type: "button", onclick: () => $(id).scrollIntoView({ behavior: "smooth", block: "start" }) }, title)));
+  $("guideBody").replaceChildren(...SECTIONS.map(([id, title, sub, ...content]) =>
+    h("section", { class: "guide-sec", id, "aria-labelledby": id + "-t" },
+      h("div", { class: "guide-side" }, h("h2", { id: id + "-t" }, title), h("p", {}, sub)),
+      h("div", { class: "guide-main" }, ...content))));
 }
-$("openGuide").addEventListener("click", () => { renderGuide(); $("guide").showModal(); });
-$("closeGuide").addEventListener("click", () => $("guide").close());
-for (const id of ["guide", "onboarding"]) {
-  $(id).addEventListener("click", e => { if (e.target === $(id)) id === "guide" ? $(id).close() : closeOnboarding(); });
+// Le mode d'emploi est une page à part : #mode-emploi.
+function route() {
+  const guide = location.hash === "#mode-emploi";
+  $("home").hidden = guide;
+  $("guidePage").hidden = !guide;
+  if (guide) renderGuide();
+  window.scrollTo(0, 0);
 }
+window.addEventListener("hashchange", route);
+route();
+$("replayOnboarding").addEventListener("click", openOnboarding);
+$("onboarding").addEventListener("click", e => { if (e.target === $("onboarding")) closeOnboarding(); });
 $("onboarding").addEventListener("cancel", e => { e.preventDefault(); closeOnboarding(); });
 
 /* ---------- Session ---------- */
