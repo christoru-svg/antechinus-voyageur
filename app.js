@@ -8,7 +8,7 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore,
   collection, doc, query, where, onSnapshot, setDoc, updateDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, COUPLE, START } from "./config.js";
+import { firebaseConfig, COUPLE, START } from "./config.js?v=6";
 
 const NAMES = { luigi: "Luigi", kritas: "Les Kritas" };
 const TO = { luigi: "Luigi", kritas: "les Kritas" };          // en milieu de phrase

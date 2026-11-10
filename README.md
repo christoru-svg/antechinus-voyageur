@@ -68,3 +68,7 @@ Elles sont dans le tableau `Q` en haut de `app.js` : `["Thème", "Question ?"]`.
 ## Coût
 
 Gratuit : le plan Spark de Firebase couvre très largement deux personnes (50 000 lectures et 20 000 écritures par jour).
+
+## Publier une modification
+
+À chaque changement de `app.js` ou `config.js`, augmente le numéro `v=` dans `index.html` (et dans l'import de `config.js` en haut de `app.js`) ainsi que `CACHE` et `SHELL` dans `sw.js`. Sinon un téléphone peut garder l'ancien script avec la nouvelle page.
