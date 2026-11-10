@@ -38,10 +38,10 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['date', 'role', 'text', 'at', 'author'])
         && (!('author' in request.resource.data) ||
             (request.resource.data.author is string && request.resource.data.author.size() <= 40));
-      // Une lettre scellée ne se modifie plus : seuls la réaction à la lettre de l'autre et « garder précieusement » changent.
+      // Une lettre scellée ne se modifie plus : seuls la réaction, « garder précieusement » et « retirer » changent.
       allow update: if couple()
         && resource.data.role == role()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reaction', 'kept']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reaction', 'kept', 'removed']);
       allow delete: if false;
     }
 

@@ -8,8 +8,8 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore,
   collection, doc, query, where, onSnapshot, setDoc, updateDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=7";
-import { Q, SEASON, SEASON_START, FIXED, PERSONAL } from "./questions.js?v=7";
+import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=8";
+import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=8";
 
 const NAMES = { luigi: "Luigi", kritas: "Les Kritas" };
 const TO = { luigi: "Luigi", kritas: "les Kritas" };          // en milieu de phrase
@@ -83,7 +83,8 @@ const S = {
   selected: keyOf(new Date()),
   busy: false,
   authError: "",
-  krita: ""             // quelle Krita écrit (choisie à chaque lettre)
+  krita: "",            // quelle Krita écrit (choisie à chaque lettre)
+  confirmRemove: null   // date dont on confirme le retrait
 };
 const other = () => (S.me ? OTHER[S.me] : null);
 const wrote = (date, role) => !!(S.status[date] && S.status[date][role]) || (role === S.me && !!S.mine[date]);
@@ -274,6 +275,10 @@ function renderDay() {
         h("p", {}, "Ta lettre est partie, scellée. ", h("b", {}, NAMES[oth]), v(oth, " n'a", " n'ont"), " pas encore répondu. L'antechinus attend, le cœur battant à 600 pulsations par minute.")));
     } else if (!theirL) {
       card.append(h("p", { class: "status" }, "L'antechinus décachette la lettre…"));
+    } else if (myL.removed) {
+      card.append(h("div", { class: "removed" },
+        h("p", {}, `Tu as retiré la lettre ${v(oth, "de Luigi", "des Kritas")}. Elle n'apparaît plus ici.`),
+        h("button", { class: "link", type: "button", disabled: S.busy, onclick: () => removeLetter(date, false) }, "La remettre")));
     } else {
       card.append(h("div", { class: "envelope" },
         h("span", { class: "from" }, theirL.author ? `De ${theirL.author}, pour les Kritas` : `De ${NAMES[oth]}`),
@@ -286,7 +291,8 @@ function renderDay() {
         h("button", {
           class: "keep", type: "button", "aria-pressed": myL.kept ? "true" : "false", disabled: S.busy,
           onclick: () => keep(date, !myL.kept)
-        }, myL.kept ? "Gardée dans la boîte à trésors" : "Garder précieusement")));
+        }, myL.kept ? "Gardée dans la boîte à trésors" : "Garder précieusement"),
+        removeControl(date, oth)));
     }
   }
   box.replaceChildren(head, card);
@@ -365,7 +371,7 @@ function renderTresors() {
   const sec = $("tresors");
   if (S.phase !== "ready") { sec.hidden = true; return; }
   sec.hidden = false;
-  const kept = Object.values(S.mine).filter(l => l.kept).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const kept = Object.values(S.mine).filter(l => l.kept && !l.removed).sort((a, b) => (a.date < b.date ? 1 : -1));
   const ul = $("tresorList");
   if (!kept.length) {
     ul.replaceChildren(h("li", { class: "empty" }, "Aucune lettre gardée pour l'instant. Une fois vos deux lettres ouvertes, touche « Garder précieusement » pour la ranger ici."));
@@ -473,6 +479,24 @@ async function writeLetter(date, text) {
   }, "Lettre scellée. L'antechinus est parti, à toute vitesse.");
 }
 
+function removeControl(date, oth) {
+  if (S.confirmRemove !== date) {
+    return h("button", { class: "link", type: "button", onclick: () => { S.confirmRemove = date; renderDay(); } }, "Retirer cette lettre");
+  }
+  return h("div", { class: "confirm", role: "group", "aria-label": "Confirmer le retrait" },
+    h("p", {}, `Retirer la lettre ${v(oth, "de Luigi", "des Kritas")} ? Elle n'apparaîtra plus pour toi. Tu pourras la remettre plus tard.`),
+    h("div", { class: "row" },
+      h("button", { class: "btn ghost", type: "button", onclick: () => { S.confirmRemove = null; renderDay(); } }, "Annuler"),
+      h("button", { class: "btn", type: "button", disabled: S.busy, onclick: () => removeLetter(date, true) }, "Retirer")));
+}
+
+async function removeLetter(date, on) {
+  S.confirmRemove = null;
+  await guard(() => updateDoc(doc(db, "letters", `${date}_${S.me}`),
+    on ? { removed: true, kept: deleteField() } : { removed: deleteField() }),
+    on ? "Lettre retirée." : "Lettre remise à sa place.");
+}
+
 async function keep(date, on) {
   await guard(() => updateDoc(doc(db, "letters", `${date}_${S.me}`), { kept: on ? true : deleteField() }),
     on ? "Rangée dans la boîte à trésors. Elle survivra à la saison." : "Retirée de la boîte à trésors.");
@@ -481,6 +505,74 @@ async function keep(date, on) {
 async function react(date, k) {
   await guard(() => updateDoc(doc(db, "letters", `${date}_${S.me}`), { reaction: k || deleteField() }), k ? "Réaction envoyée." : null);
 }
+
+/* ---------- Onboarding et mode d'emploi ---------- */
+function steps(role) {
+  return [
+    ["Bienvenue dans le terrier", "Chaque jour, une nouvelle question arrive pour Luigi et les Kritas. Chacun y répond par une lettre. C'est tout, et c'est beaucoup."],
+    ["Écris ta lettre", "Réponds sous la question du jour, puis touche « Sceller ma lettre ». Une fois scellée, elle ne se modifie plus."
+      + (role === "kritas" ? " Côté Kritas : avant d'écrire, choisis quelle Krita tient la plume." : "")],
+    ["Le sceau", "Tu ne lis la lettre de l'autre qu'après avoir écrit la tienne. Impossible de copier, impossible de s'influencer : c'est le serveur qui y veille."],
+    ["Pas de panique", "La question du jour expire à minuit, comme un antechinus mâle. Si vous l'avez ratée, elle vous attend dans le terrier, en bas de la page."],
+    ["Après la lecture", "Réagis à la lettre de l'autre, garde les plus belles dans la boîte à trésors, ou retire celles que tu ne veux plus voir. La jauge immunitaire du couple remonte quand vous avez écrit tous les deux."],
+    ["Sur ton téléphone", "Ajoute l'appli à ton écran d'accueil. Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮, puis « Installer l'application ». Le mode d'emploi reste disponible en haut de la page."]
+  ];
+}
+
+const onboardKey = () => `antechinus-onboarded-${S.me}`;
+function maybeOnboard() {
+  let done = false;
+  try { done = localStorage.getItem(onboardKey()) === "1"; } catch {}
+  if (!done) openOnboarding();
+}
+let obStep = 0;
+function openOnboarding() { obStep = 0; renderOnboarding(); const d = $("onboarding"); if (!d.open) d.showModal(); }
+function closeOnboarding() {
+  try { localStorage.setItem(onboardKey(), "1"); } catch {}
+  $("onboarding").close();
+}
+function renderOnboarding() {
+  const list = steps(S.me), [title, text] = list[obStep], last = obStep === list.length - 1;
+  $("onboarding").replaceChildren(h("div", { class: "sheet" },
+    h("svg", { class: "ob-art", viewBox: "0 0 110 110", "aria-hidden": "true" }),
+    h("p", { class: "ob-count" }, `${obStep + 1} / ${list.length}`),
+    h("h2", {}, title),
+    h("p", {}, text),
+    h("div", { class: "dots-row", "aria-hidden": "true" }, ...list.map((_, i) => h("span", { class: i === obStep ? "on" : "" }))),
+    h("div", { class: "row" },
+      last ? null : h("button", { class: "link", type: "button", onclick: closeOnboarding }, "Passer"),
+      obStep > 0 ? h("button", { class: "btn ghost", type: "button", onclick: () => { obStep--; renderOnboarding(); } }, "Retour") : null,
+      h("button", { class: "btn love", type: "button", onclick: () => { if (last) closeOnboarding(); else { obStep++; renderOnboarding(); } } },
+        last ? "C'est parti" : "Suivant"))));
+  $("onboarding").querySelector(".ob-art").replaceWith(svgUse(64));
+}
+
+function renderGuide() {
+  const role = S.me || "luigi";
+  $("guideBody").replaceChildren(
+    h("h3", {}, "Comment ça marche"),
+    h("ol", { class: "guide-steps" }, ...steps(role).map(([t, p]) => h("li", {}, h("b", {}, t), h("span", {}, p)))),
+    h("h3", {}, "Les thèmes"),
+    h("dl", { class: "themes" }, ...THEMES.flatMap(([t, d]) => [h("dt", {}, t), h("dd", {}, d)])),
+    h("h3", {}, "Les jours spéciaux"),
+    h("dl", { class: "themes" },
+      h("dt", {}, "Saison des amours (la vraie)"), h("dd", {}, "Du 1er au 21 août, comme chez l'antechinus brun : 21 questions plus coquines, et une jauge qui chute deux fois plus vite."),
+      h("dt", {}, "Fêtes"), h("dd", {}, "Nouvel An, Saint-Valentin, Réveillon, Noël et 31 décembre ont leur propre question."),
+      h("dt", {}, "Vos dates"), h("dd", {}, "Le 13 août (votre rencontre), le 26 octobre (anniversaire des Kritas) et le 26 novembre (anniversaire de Luigi).")),
+    h("h3", {}, "Questions fréquentes"),
+    h("dl", { class: "themes" },
+      h("dt", {}, "Qui peut lire nos lettres ?"), h("dd", {}, "Seulement vous deux : la base n'accepte que vos deux adresses e-mail, et chaque lettre reste fermée tant que l'autre n'a pas écrit la sienne."),
+      h("dt", {}, "Peut-on modifier une lettre ?"), h("dd", {}, "Non. Une fois scellée, elle est envoyée telle quelle. Seules la réaction et la boîte à trésors changent ensuite."),
+      h("dt", {}, "Que fait « Retirer cette lettre » ?"), h("dd", {}, "La lettre de l'autre n'apparaît plus pour toi. Elle n'est pas supprimée : tu peux la remettre depuis le même jour, dans le terrier."),
+      h("dt", {}, "Et si on rate un jour ?"), h("dd", {}, "La question reste dans le terrier. Vous pouvez y répondre quand vous voulez.")),
+    h("button", { class: "link", type: "button", onclick: () => { $("guide").close(); if (S.phase === "ready") openOnboarding(); } }, "Revoir l'introduction"));
+}
+$("openGuide").addEventListener("click", () => { renderGuide(); $("guide").showModal(); });
+$("closeGuide").addEventListener("click", () => $("guide").close());
+for (const id of ["guide", "onboarding"]) {
+  $(id).addEventListener("click", e => { if (e.target === $(id)) id === "guide" ? $(id).close() : closeOnboarding(); });
+}
+$("onboarding").addEventListener("cancel", e => { e.preventDefault(); closeOnboarding(); });
 
 /* ---------- Session ---------- */
 function roleFor(email) {
@@ -492,7 +584,7 @@ function enter(user) {
   S.me = roleFor(user.email);
   if (!S.me) { S.phase = "stranger"; stopData(); }
   else if (!user.emailVerified) { S.phase = "verify"; stopData(); }
-  else { S.phase = "ready"; startData(); }
+  else { S.phase = "ready"; startData(); maybeOnboard(); }
   renderAll();
 }
 

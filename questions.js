@@ -1529,3 +1529,19 @@ export const PERSONAL = {
     "C'est l'anniversaire des Kritas. Qu'est-ce que cette nouvelle année devrait leur apporter ? (Les Kritas : ce que vous vous souhaitez.)"
   ]
 };
+
+// Description des thèmes, affichée dans le mode d'emploi.
+export const THEMES = [
+  ["Avant le crash immunitaire", "Vos souvenirs et vos débuts."],
+  ["Si on n'avait que 15 heures", "Les « et si… » : scénarios imaginaires, rêves et situations absurdes."],
+  ["Petites manies de marsupial", "Les habitudes et les tics de l'autre, vus de l'extérieur."],
+  ["Devine-moi", "Deviner les goûts, les peurs et les pensées de l'autre."],
+  ["Saison des amours", "Tendresse, câlins et romantisme du quotidien."],
+  ["Le terrier", "La vie à la maison, les rituels et les corvées."],
+  ["Gratitude avant extinction", "Dire merci, pour les grandes et les petites choses."],
+  ["Demain (si on survit)", "Projets, envies et avenir à deux."],
+  ["Goûts de marsupial", "Musique, films, livres, cuisine et plaisirs coupables."],
+  ["Avant l'antechinus", "L'enfance et la vie d'avant la rencontre."],
+  ["Questions qui piquent un peu", "Les sujets plus délicats, à aborder avec douceur."],
+  ["Nos voyages", "Voyages passés, rêvés et ratés."]
+];

@@ -125,6 +125,28 @@ textarea{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line
 .keep[aria-pressed="true"]{background:var(--love);color:#fff;border-style:solid}
 .list .star{color:var(--love)}
 .list li.empty{padding:12px 2px;color:var(--muted);font-size:14px}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:-12px}
+.guide-btn{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600}
+dialog{border:0;padding:0;background:transparent;color:var(--ink);max-width:min(560px,calc(100vw - 32px));width:100%;max-height:calc(100dvh - 48px)}
+dialog::backdrop{background:rgba(20,28,24,.55)}
+.sheet{background:var(--paper);border-radius:20px;padding:22px 20px;display:flex;flex-direction:column;gap:12px;max-height:calc(100dvh - 48px);overflow:auto}
+.sheet h2{font-size:24px;font-weight:800}
+.sheet h3{font-size:17px;font-weight:800;margin-top:10px}
+.sheet .row{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:-22px;background:var(--paper);padding-block:4px}
+.ob-count{font-size:12px;letter-spacing:.1em;color:var(--muted)}
+.dots-row{display:flex;gap:6px}
+.dots-row span{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dots-row span.on{background:var(--love)}
+.guide-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.guide-steps b{display:block}
+.guide-steps span{color:var(--muted);font-size:14px}
+.themes{margin:0;display:grid;gap:4px 0}
+.themes dt{font-weight:600;margin-top:6px}
+.themes dd{margin:0;color:var(--muted);font-size:14px}
+.removed{padding:14px;border-radius:12px;border:1px dashed var(--line);color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.confirm{padding:12px;border-radius:12px;background:var(--bg);font-size:14px;display:flex;flex-direction:column;gap:8px}
+.confirm .row{display:flex;gap:8px;flex-wrap:wrap}
 .expiry{font-size:13px;color:var(--muted);margin-top:-6px}
 .expiry .t{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
 .krita{display:flex;flex-direction:column;gap:8px}
@@ -203,6 +225,10 @@ footer{font-size:12px;color:var(--muted);text-align:center}
 </svg>
 
 <div class="wrap">
+  <nav class="topbar" aria-label="Menu">
+    <button class="guide-btn" id="openGuide" type="button">Mode d'emploi</button>
+  </nav>
+
   <header class="hero">
     <div>
       <h1>L'Antechinus <em>Voyageur</em></h1>
@@ -260,12 +286,23 @@ footer{font-size:12px;color:var(--muted);text-align:center}
       <li><div><b>Chacun écrit sa lettre</b><span>Elle reste scellée tant que l'autre n'a pas écrit la sienne. Impossible de s'influencer, impossible de copier.</span></div></li>
       <li><div><b>L'antechinus livre</b><span>Les deux lettres s'ouvrent. Vous réagissez, vous en parlez le soir, et votre système immunitaire remonte.</span></div></li>
     </ol>
+    <p class="intro" style="margin-top:12px">Tous les détails, et la liste des thèmes, sont dans le mode d'emploi en haut de la page.</p>
   </section>
 
   <footer>Aucun antechinus n'a été épuisé pendant la fabrication de cette page. Enfin, presque.</footer>
 </div>
+<dialog id="guide" aria-labelledby="guideTitle">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="guideTitle">Mode d'emploi</h2>
+      <button class="link" id="closeGuide" type="button">Fermer</button>
+    </div>
+    <div id="guideBody"></div>
+  </div>
+</dialog>
+<dialog id="onboarding" aria-label="Bienvenue"></dialog>
 <div class="toast" id="toast" hidden></div>
 
-<script type="module" src="app.js?v=7"></script>
+<script type="module" src="app.js?v=8"></script>
 </body>
 </html>

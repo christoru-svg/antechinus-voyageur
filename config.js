@@ -19,9 +19,9 @@ export const COUPLE = {
 
 // 3. Vos dates (format "MM-JJ", par ex. "06-21"). Laisse "" si tu ne veux pas de question spéciale.
 export const DATES = {
-  rencontre: "",          // anniversaire de votre rencontre
-  anniversaireLuigi: "",
-  anniversaireKritas: ""
+  rencontre: "08-13",        // anniversaire de votre rencontre
+  anniversaireLuigi: "11-26",
+  anniversaireKritas: "10-26"
 };
 
 // 4. Le jour de la lettre n° 1 (AAAA-MM-JJ).
