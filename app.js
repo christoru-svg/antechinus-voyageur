@@ -8,8 +8,8 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore,
   collection, doc, query, where, onSnapshot, setDoc, updateDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=8";
-import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=8";
+import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=9";
+import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=9";
 
 const NAMES = { luigi: "Luigi", kritas: "Les Kritas" };
 const TO = { luigi: "Luigi", kritas: "les Kritas" };          // en milieu de phrase
@@ -509,13 +509,10 @@ async function react(date, k) {
 /* ---------- Onboarding et mode d'emploi ---------- */
 function steps(role) {
   return [
-    ["Bienvenue dans le terrier", "Chaque jour, une nouvelle question arrive pour Luigi et les Kritas. Chacun y répond par une lettre. C'est tout, et c'est beaucoup."],
-    ["Écris ta lettre", "Réponds sous la question du jour, puis touche « Sceller ma lettre ». Une fois scellée, elle ne se modifie plus."
-      + (role === "kritas" ? " Côté Kritas : avant d'écrire, choisis quelle Krita tient la plume." : "")],
-    ["Le sceau", "Tu ne lis la lettre de l'autre qu'après avoir écrit la tienne. Impossible de copier, impossible de s'influencer : c'est le serveur qui y veille."],
-    ["Pas de panique", "La question du jour expire à minuit, comme un antechinus mâle. Si vous l'avez ratée, elle vous attend dans le terrier, en bas de la page."],
-    ["Après la lecture", "Réagis à la lettre de l'autre, garde les plus belles dans la boîte à trésors, ou retire celles que tu ne veux plus voir. La jauge immunitaire du couple remonte quand vous avez écrit tous les deux."],
-    ["Sur ton téléphone", "Ajoute l'appli à ton écran d'accueil. Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮, puis « Installer l'application ». Le mode d'emploi reste disponible en haut de la page."]
+    ["Une question par jour", "Chaque jour, une question arrive pour Luigi et les Kritas. Réponds-y par une lettre, puis touche « Sceller ma lettre » : elle ne se modifie plus ensuite."
+      + (role === "kritas" ? " Côté Kritas, choisis d'abord quelle Krita tient la plume." : "")],
+    ["Le sceau", "Tu ne lis la lettre de l'autre qu'après avoir écrit la tienne. La question expire à minuit, comme un antechinus mâle, mais celles que vous avez ratées vous attendent dans le terrier."],
+    ["Après la lecture", "Réagis, garde les plus belles lettres dans la boîte à trésors ou retire celles que tu ne veux plus voir. Tout le reste est dans le mode d'emploi, en haut de la page."]
   ];
 }
 
@@ -564,7 +561,8 @@ function renderGuide() {
       h("dt", {}, "Qui peut lire nos lettres ?"), h("dd", {}, "Seulement vous deux : la base n'accepte que vos deux adresses e-mail, et chaque lettre reste fermée tant que l'autre n'a pas écrit la sienne."),
       h("dt", {}, "Peut-on modifier une lettre ?"), h("dd", {}, "Non. Une fois scellée, elle est envoyée telle quelle. Seules la réaction et la boîte à trésors changent ensuite."),
       h("dt", {}, "Que fait « Retirer cette lettre » ?"), h("dd", {}, "La lettre de l'autre n'apparaît plus pour toi. Elle n'est pas supprimée : tu peux la remettre depuis le même jour, dans le terrier."),
-      h("dt", {}, "Et si on rate un jour ?"), h("dd", {}, "La question reste dans le terrier. Vous pouvez y répondre quand vous voulez.")),
+      h("dt", {}, "Et si on rate un jour ?"), h("dd", {}, "La question reste dans le terrier. Vous pouvez y répondre quand vous voulez."),
+      h("dt", {}, "Comment l'installer sur le téléphone ?"), h("dd", {}, "Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮, puis « Installer l'application ».")),
     h("button", { class: "link", type: "button", onclick: () => { $("guide").close(); if (S.phase === "ready") openOnboarding(); } }, "Revoir l'introduction"));
 }
 $("openGuide").addEventListener("click", () => { renderGuide(); $("guide").showModal(); });
