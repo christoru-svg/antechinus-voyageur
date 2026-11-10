@@ -90,6 +90,7 @@ button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid va
 .stamp svg{width:42px}
 .theme{align-self:flex-start;font-size:12px;font-weight:600;letter-spacing:.04em;padding:4px 10px;border-radius:99px;background:var(--gum-soft);color:var(--gum)}
 .question{font-size:clamp(22px,5vw,28px);font-weight:600;letter-spacing:-.01em;padding-right:70px}
+.theme + .question{margin-top:-2px} /* 12px sous le thème (gap 14px - 2px) */
 textarea{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:14px;
   font-family:var(--hand);font-size:20px;line-height:1.45;background:
   repeating-linear-gradient(var(--paper) 0 28px, var(--line) 28px 29px);color:var(--ink);background-attachment:local}
@@ -151,7 +152,10 @@ footer{font-size:12px;color:var(--muted);text-align:center}
 @media (max-width:460px){
   .hero{grid-template-columns:1fr}
   .hero svg{justify-self:start;order:-1;width:110px}
-  .question{padding-right:0;padding-top:58px}
+  .stamp{width:44px;height:50px;top:12px;right:12px}
+  .stamp svg{width:32px}
+  .question{padding-right:50px}
+  .letter .theme{max-width:calc(100% - 56px)}
   .list button{grid-template-columns:58px 1fr auto}
 }
 @media (prefers-reduced-motion:no-preference){
