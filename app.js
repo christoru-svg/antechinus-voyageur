@@ -8,8 +8,8 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore,
   collection, doc, query, where, onSnapshot, setDoc, updateDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=13";
-import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=13";
+import { firebaseConfig, COUPLE, START, DATES } from "./config.js?v=14";
+import { Q, SEASON, SEASON_START, FIXED, PERSONAL, THEMES } from "./questions.js?v=14";
 
 const NAMES = { luigi: "Luigi", kritas: "Les Kritas" };
 const TO = { luigi: "Luigi", kritas: "les Kritas" };          // en milieu de phrase
@@ -275,7 +275,13 @@ function renderDay() {
         h("p", {}, `Tu as retiré la lettre ${v(oth, "de Luigi", "des Kritas")}. Elle n'apparaît plus ici.`),
         h("button", { class: "link", type: "button", disabled: S.busy, onclick: () => removeLetter(date, false) }, "La remettre")));
     } else {
-      card.append(h("div", { class: "envelope" },
+      card.append(h("div", { class: "envelope received" },
+        h("button", {
+          class: "keep", type: "button", "aria-pressed": myL.kept ? "true" : "false", disabled: S.busy,
+          "aria-label": myL.kept ? "Retirer de la boîte à trésors" : "Garder dans la boîte à trésors",
+          title: myL.kept ? "Gardée dans la boîte à trésors" : "Garder dans la boîte à trésors",
+          onclick: () => keep(date, !myL.kept)
+        }, heartSvg()),
         h("span", { class: "from" }, theirL.author ? `De ${theirL.author}, pour les Kritas` : `De ${NAMES[oth]}`),
         h("p", { class: "handwritten" }, theirL.text),
         h("div", { class: "reactions", role: "group", "aria-label": "Réagir à sa lettre" },
@@ -283,14 +289,20 @@ function renderDay() {
             class: "chip", type: "button", "aria-pressed": myL.reaction === k ? "true" : "false",
             disabled: S.busy, onclick: () => react(date, myL.reaction === k ? null : k)
           }, label))),
-        h("button", {
-          class: "keep", type: "button", "aria-pressed": myL.kept ? "true" : "false", disabled: S.busy,
-          onclick: () => keep(date, !myL.kept)
-        }, myL.kept ? "Gardée dans la boîte à trésors" : "Garder précieusement"),
         removeControl(date, oth)));
     }
   }
   box.replaceChildren(head, card);
+}
+
+function heartSvg() {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("aria-hidden", "true");
+  const p = document.createElementNS(NS, "path");
+  p.setAttribute("d", "M12 20.5s-7.5-4.6-9.3-9.2C1.5 8.2 3.4 4.5 7 4.5c2.1 0 3.5 1.2 5 3 1.5-1.8 2.9-3 5-3 3.6 0 5.5 3.7 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z");
+  svg.append(p);
+  return svg;
 }
 
 /* ---------- Quelle Krita écrit ? ---------- */
@@ -370,7 +382,7 @@ function renderTresors() {
   }
   const kept = Object.values(S.mine).filter(l => l.kept && !l.removed).sort((a, b) => (a.date < b.date ? 1 : -1));
   if (!kept.length) {
-    ul.replaceChildren(h("li", { class: "empty" }, "Aucune lettre gardée pour l'instant. Une fois vos deux lettres ouvertes, touche « Garder précieusement » pour la ranger ici."));
+    ul.replaceChildren(h("li", { class: "empty" }, "Aucune lettre gardée pour l'instant. Une fois vos deux lettres ouvertes, touche le cœur en haut de sa lettre pour la ranger ici."));
     return;
   }
   ul.replaceChildren(...kept.map(l => h("li", { class: l.date === S.selected ? "current" : "" },
@@ -584,7 +596,7 @@ function renderGuide() {
       h("div", { class: "card" },
         acc("Qui peut lire nos lettres ?", h("p", {}, "Seulement vous deux. La base n'accepte que vos deux adresses e-mail, et chaque lettre reste fermée tant que l'autre n'a pas écrit la sienne.")),
         acc("Peut-on modifier une lettre ?", h("p", {}, "Non. Une fois scellée, elle part telle quelle. Seules la réaction, la boîte à trésors et le retrait changent ensuite.")),
-        acc("Que fait « Garder précieusement » ?", h("p", {}, "Une fois les deux lettres d'un jour ouvertes, l'échange rejoint ta boîte à trésors, sous la lettre du jour. Chacun a la sienne.")),
+        acc("À quoi sert le cœur ?", h("p", {}, "Une fois les deux lettres d'un jour ouvertes, touche le cœur en haut à droite de la lettre reçue : l'échange rejoint ta boîte à trésors. Touche-le à nouveau pour l'en retirer. Chacun a sa boîte.")),
         acc("Que fait « Retirer cette lettre » ?", h("p", {}, "La lettre de l'autre n'apparaît plus pour toi. Elle n'est pas supprimée : tu peux la remettre depuis le même jour, dans le terrier.")),
         acc("Et si on rate un jour ?", h("p", {}, "La question reste dans le terrier, en bas de la page. Vous pouvez y répondre quand vous voulez.")))],
     ["g-appli", "L'appli", "L'installer sur le téléphone et comprendre ce qui s'affiche.",

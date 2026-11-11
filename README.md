@@ -71,7 +71,7 @@ Tout est dans `questions.js` :
 
 ## La boîte à trésors
 
-Une fois les deux lettres d'un jour ouvertes, « Garder précieusement » range l'échange dans la boîte à trésors (chacun a la sienne). « Retirer cette lettre » masque la lettre de l'autre pour soi, sans la supprimer ; on peut la remettre.
+Une fois les deux lettres d'un jour ouvertes, le cœur en haut à droite de la lettre reçue range l'échange dans la boîte à trésors (chacun a la sienne). « Retirer cette lettre » masque la lettre de l'autre pour soi, sans la supprimer ; on peut la remettre.
 
 ## Coût
 
